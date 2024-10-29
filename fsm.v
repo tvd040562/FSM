@@ -14,7 +14,8 @@ module fsm (
 			st <= nx_st;
 	end
 
-	always_comb begin
+	always @(*) begin
+		out = 0;
 		case (st)
 			S1: 
 				if (enable) begin
@@ -28,46 +29,9 @@ module fsm (
 			S3: nx_st = S4;
 			S4: nx_st = S5;
 			S5: nx_st = S6;
-			S6: nx_st = S1;
+			default: nx_st = S1;
 		endcase
 	end
 
 endmodule
 
-module tb;
-	reg clk, rstb, enable;
-	reg [3:0] out;
-
-	fsm dut (
-		.clk(clk),
-		.rstb(rstb),
-		.enable(enable),
-		.out(out)
-	);
-
-	initial begin
-		clk = 0;
-		forever
-			#5 clk = ~clk;
-	end
-
-	task wait4clk (input integer n);
-		begin 
-			repeat (n) 
-				@(posedge clk); 
-		end
-	endtask
-
-	initial begin
-		$dumpfile("fsm.vcd");
-		$dumpvars();
-		rstb = 0;
-		enable = 0;
-		wait4clk(2);
-		rstb = 1;
-		wait4clk(10);
-		enable = 1;
-		wait4clk(10);
-		$finish();
-	end
-endmodule
